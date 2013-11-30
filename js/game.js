@@ -1,62 +1,58 @@
+// Imports
+document.write('<script src="js/Input.js"></script>');
+document.write('<script src="js/Utility.js"></script>');
+
 // Context
-var canvas;
 var stage;
+var width;
+var height;
 
-// BG Images
-var bg;
-var main;
-
-// Button images
-var startButton;
-var creditsButton;
-
-// Credits screen
-var credits;
-
-// Game
+// Objects
 var player;
-var ball;
 var cpu;
-var win;
-var lose;
-
-// Score
-var playerScore;
-var cpuScore;
-
-// Movement
-var cpuSpeed = 6;
-var xSpeed = 5;
-var ySpeed = 5;
-
-// Clock
-var ticker = new Object;
-
-// Preloader
-var preloader;
-var manifest;
-var totalLoaded = 0;
-
-var TitleView = new Container();
+var ball;
 
 function run()
 {
-	canvas = document.getElementById('canvas');
-	stage = new Stage(canvas);
+	stage = new createjs.Stage('canvas');
+	width = stage.canvas.width;
+	height = stage.canvas.height;
 
-	stage.mouseEventsEnabled = true;
+	Input.initialize(stage.canvas);
+	Input.preventDefaultKeys(['up', 'down', 'left', 'right']);
 
-	manifest = [
-		{src:'img/backgrounds/bg.png', id:'bg'}
-	];
+	ball = new createjs.Shape();
+	ball.graphics.beginFill('red').drawCircle(width * 0.5, height * 0.5, 10);
+	stage.addChild(ball);
 
-	preloader = new PreloadJS();
-	preloader.installPlugin(SoundJS);
-	preloader.onProgress = handleProgress;
-	preloader.onComplete = handleComplete;
-	preloader.onFileLoad = handleFileLoad;
-	preloader.loadManifest(manifest);
+	player = new createjs.Shape();
+	player.speed = 50;
+	player.graphics.beginFill('black').drawRect(25, (height * 0.5) - (75), 15, 150);
+	stage.addChild(player);
 
-	Ticker.setFPS(60);
-	Ticker.addListener(stage);
+	cpu = new createjs.Shape();
+	cpu.graphics.beginFill('black').drawRect(width - 25, (height * 0.5) - (75), 15, 150);
+	stage.addChild(cpu);
+
+
+	createjs.Ticker.setFPS(60);
+	createjs.Ticker.addEventListener('tick', handleTick);
+
+	function handleTick()
+	{
+		stage.update();
+		if(Input.pressed('w up'))
+		{
+			player.y -= player.speed * getDelta();
+		}
+		else if(Input.pressed('s down'))
+		{
+			player.y += player.speed * getDelta();
+		}
+	}
+}
+
+function getDelta()
+{
+	return 10 / createjs.Ticker.getMeasuredFPS();
 }
